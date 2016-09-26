@@ -1,3 +1,5 @@
+import Dict
+
 import Html exposing (..)
 import Html.App as App
 import Html.Attributes exposing (..)
@@ -15,14 +17,31 @@ main =
 
 -- MODEL
 
+type alias Dados = List Int
+
 type alias Model = 
-    { someValue: String
+    { puntos: Dict.Dict Categoria Int
+    , dados: Dados
+    , turno: Int
     }
+
+type Categoria = Numero Int
+    | Escalera
+    | Full
+    | Poker
+    | Generala
+    | DobleGenerala
 
 init : (Model, Cmd Msg)
 init = 
-    ( Model "complete me"
-    , Cmd.none)
+    let
+        model = Model Dict.empty [] 0
+    in
+        ( model
+        , Cmd.none)
+
+puntaje : Categoria -> Dados -> Int
+puntaje c d = 0
 
 
 -- UPDATE
