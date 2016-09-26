@@ -1,5 +1,7 @@
 module TestHelpers exposing (..)
 
+import Dict
+
 import Test exposing (..)
 import Expect
 
@@ -20,5 +22,16 @@ all = describe "Helpers"
             \() ->
                 count 2 [1,2,3,2,2]
                     |> Expect.equal 3
+        ]
+    , describe "countAll"
+        [ test "Empty list" <|
+            \() ->
+                countAll []
+                    |> Expect.equal Dict.empty
+        , test "Non-empty list" <|
+            \() ->
+                countAll ["a", "b", "c", "b", "b", "c", "b", "d"]
+                    |> Dict.toList
+                    |> Expect.equal [("a", 1), ("b", 4), ("c", 2), ("d", 1)]
         ]
     ]
