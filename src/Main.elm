@@ -42,11 +42,33 @@ init =
         ( model
         , Cmd.none)
 
+{- Decide si se le deben asignar los puntos o no a una categoría -}
+validar : Categoria -> Dados -> Bool
+validar c d =
+    case c of
+        Escalera ->
+            d
+                |> List.sort
+                |> flip List.member [[1,2,3,4,5], [2,3,4,5,6], [1,3,4,5,6]]
+        _ ->
+            False
+
+{- Si la categoría es válida le da un puntaje fijo, sino es 0 -}
+puntajeFijo : Int -> Categoria -> Dados -> Int
+puntajeFijo p c d =
+    if validar c d then
+        p
+    else
+        0
+
 puntaje : Categoria -> Dados -> Int
 puntaje c d =
     case c of
         Numero n ->
             n * count n d
+
+        Escalera ->
+            puntajeFijo 20 c d
         _ ->
             Debug.crash "ok"
 
