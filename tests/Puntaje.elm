@@ -63,4 +63,26 @@ all =
                     |> puntaje Escalera
                     |> Expect.equal 0
             ]
+        , describe "Full"
+            [ test "Da puntos con un par y una terna" <|
+                \() ->
+                    [1,1,1,5,5]
+                    |> puntaje Full
+                    |> Expect.equal 30
+            , test "Da puntos desordenado" <|
+                \() ->
+                    [2,1,1,2,1]
+                    |> puntaje Full
+                    |> Expect.equal 30
+            , test "No da puntos con cinco iguales" <|
+                \() ->
+                    [1,1,1,1,1]
+                    |> puntaje Full
+                    |> Expect.equal 0
+            , test "No da puntos con otra combinación" <|
+                \() ->
+                    [1,5,2,2,3]
+                    |> puntaje Full
+                    |> Expect.equal 0
+            ]
         ]

@@ -50,6 +50,13 @@ validar c d =
             d
                 |> List.sort
                 |> flip List.member [[1,2,3,4,5], [2,3,4,5,6], [1,3,4,5,6]]
+
+        Full ->
+            d
+                |> countAll
+                |> Dict.values
+                |> List.sort
+                |> (==) [2, 3]
         _ ->
             False
 
@@ -69,6 +76,10 @@ puntaje c d =
 
         Escalera ->
             puntajeFijo 20 c d
+
+        Full ->
+            puntajeFijo 30 c d
+
         _ ->
             Debug.crash "ok"
 
