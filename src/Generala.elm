@@ -5,8 +5,6 @@ import Html.App as App
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 
-import Helpers exposing (..)
-
 
 main =
     App.program
