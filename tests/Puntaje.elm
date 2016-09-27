@@ -129,4 +129,16 @@ all =
                     |> puntaje Generala
                     |> Expect.equal 0
             ]
+        , describe "Doble generala"
+            [ test "Cien puntos con generala" <|
+                \() ->
+                    [1,1,1,1,1]
+                    |> puntaje DobleGenerala
+                    |> Expect.equal 100
+            , test "Cero puntos sin generala" <|
+                \() ->
+                    [1,1,1,1,2]
+                    |> puntaje DobleGenerala
+                    |> Expect.equal 0
+            ]
         ]

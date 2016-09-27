@@ -108,8 +108,8 @@ puntaje c d =
         Generala ->
             puntajeFijo 50 c d
 
-        _ ->
-            Debug.crash "ok"
+        DobleGenerala ->
+            puntajeFijo 100 Generala d
 
 
 -- UPDATE
