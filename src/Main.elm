@@ -68,6 +68,17 @@ validar c d =
                 |> List.head -- Maybe Int
                 |> Maybe.map (flip (>=) 4)
                 |> (==) (Maybe.Just True)
+
+        Generala ->
+            d
+                |> countAll
+                |> Dict.values
+                |> List.sort
+                |> List.reverse -- Número máximo de veces que se repite un dado
+                |> List.head -- Maybe Int
+                |> Maybe.map ((==) 5)
+                |> Maybe.withDefault False
+
         _ ->
             False
 
@@ -93,6 +104,9 @@ puntaje c d =
 
         Poker ->
             puntajeFijo 40 c d
+
+        Generala ->
+            puntajeFijo 50 c d
 
         _ ->
             Debug.crash "ok"

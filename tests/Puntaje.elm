@@ -107,4 +107,26 @@ all =
                     |> puntaje Poker
                     |> Expect.equal 0
             ]
+        , describe "Generala"
+            [ test "Da puntos con cinco cincos" <|
+                \() ->
+                    [5,5,5,5,5]
+                    |> puntaje Generala
+                    |> Expect.equal 50
+            , test "Da puntos con cinco cuatros" <|
+                \() ->
+                    [4,4,4,4,4]
+                    |> puntaje Generala
+                    |> Expect.equal 50
+            , test "No da puntos con cuatro iguales" <|
+                \() ->
+                    [4,4,3,4,4]
+                    |> puntaje Generala
+                    |> Expect.equal 0
+            , test "No da puntos con otra combinación" <|
+                \() ->
+                    [1,5,3,4,3]
+                    |> puntaje Generala
+                    |> Expect.equal 0
+            ]
         ]
