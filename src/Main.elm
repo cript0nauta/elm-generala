@@ -1,4 +1,5 @@
 import Dict
+import Maybe
 
 import Html exposing (..)
 import Html.App as App
@@ -57,6 +58,16 @@ validar c d =
                 |> Dict.values
                 |> List.sort
                 |> (==) [2, 3]
+
+        Poker ->
+            d
+                |> countAll
+                |> Dict.values
+                |> List.sort
+                |> List.reverse -- Número máximo de veces que se repite un dado
+                |> List.head -- Maybe Int
+                |> Maybe.map (flip (>=) 4)
+                |> (==) (Maybe.Just True)
         _ ->
             False
 
@@ -79,6 +90,9 @@ puntaje c d =
 
         Full ->
             puntajeFijo 30 c d
+
+        Poker ->
+            puntajeFijo 40 c d
 
         _ ->
             Debug.crash "ok"

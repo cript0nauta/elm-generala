@@ -85,4 +85,26 @@ all =
                     |> puntaje Full
                     |> Expect.equal 0
             ]
+        , describe "Poker"
+            [ test "Da puntos con 4 iguales" <|
+                \() ->
+                    [5,3,5,5,5]
+                    |> puntaje Poker
+                    |> Expect.equal 40
+            , test "Da puntos con 5 iguales" <| -- TODO: Ver si esto vale
+                \() ->
+                    [2,2,2,2,2]
+                    |> puntaje Poker
+                    |> Expect.equal 40
+            , test "No da puntos con 3 iguales" <|
+                \() ->
+                    [1,1,1,2,2]
+                    |> puntaje Poker
+                    |> Expect.equal 0
+            , test "No da puntos con otra combinación" <|
+                \() ->
+                    [3,5,3,2,1]
+                    |> puntaje Poker
+                    |> Expect.equal 0
+            ]
         ]
