@@ -1,5 +1,5 @@
 import Dict
-import Maybe
+import Maybe exposing (Maybe(..))
 
 import Html exposing (..)
 import Html.App as App
@@ -46,45 +46,50 @@ init =
 {- Decide si se le deben asignar los puntos o no a una categoría -}
 validar : Categoria -> Dados -> Bool
 validar c d =
-    case c of
-        Escalera ->
-            d
-                |> List.sort
-                |> flip List.member [[1,2,3,4,5], [2,3,4,5,6], [1,3,4,5,6]]
+    let
+        {- Retornar el elemento más veces repetido si la lista tiene elementos -}
+        maxRepetitions : List comparable -> Maybe comparable
+        maxRepetitions =
+            countAll
+            >> Dict.values
+            >> List.sort
+            >> List.reverse
+            >> List.head
 
-        Full ->
-            d
-                |> countAll
-                |> Dict.values
-                |> List.sort
-                |> (==) [2, 3]
+        maybeFilter : (a -> Bool) -> Maybe a -> Bool
+        maybeFilter f =
+            Maybe.map f
+            >> Maybe.withDefault False
+    in
+        case c of
+            Escalera ->
+                d
+                    |> List.sort
+                    |> flip List.member [[1,2,3,4,5], [2,3,4,5,6], [1,3,4,5,6]]
 
-        Poker ->
-            d
-                |> countAll
-                |> Dict.values
-                |> List.sort
-                |> List.reverse -- Número máximo de veces que se repite un dado
-                |> List.head -- Maybe Int
-                |> Maybe.map (flip (>=) 4)
-                |> (==) (Maybe.Just True)
+            Full ->
+                d
+                    |> countAll
+                    |> Dict.values
+                    |> List.sort
+                    |> (==) [2, 3]
 
-        Generala ->
-            d
-                |> countAll
-                |> Dict.values
-                |> List.sort
-                |> List.reverse -- Número máximo de veces que se repite un dado
-                |> List.head -- Maybe Int
-                |> Maybe.map ((==) 5)
-                |> Maybe.withDefault False
+            Poker ->
+                d
+                    |> maxRepetitions
+                    |> maybeFilter (flip (>=) 4)
 
-        _ ->
-            False
+            Generala ->
+                d
+                    |> maxRepetitions
+                    |> maybeFilter ((==) 5)
+
+            _ ->
+                False
 
 {- Si la categoría es válida le da un puntaje fijo, sino es 0 -}
-puntajeFijo : Int -> Categoria -> Dados -> Int
-puntajeFijo p c d =
+puntajeFijo : Categoria -> Dados -> Int -> Int
+puntajeFijo c d p =
     if validar c d then
         p
     else
@@ -92,24 +97,28 @@ puntajeFijo p c d =
 
 puntaje : Categoria -> Dados -> Int
 puntaje c d =
-    case c of
-        Numero n ->
-            n * count n d
+    let
+        fijo : Int -> Int
+        fijo = puntajeFijo c d
+    in
+        case c of
+            Numero n ->
+                n * count n d
 
-        Escalera ->
-            puntajeFijo 20 c d
+            Escalera ->
+                fijo 20
 
-        Full ->
-            puntajeFijo 30 c d
+            Full ->
+                fijo 30
 
-        Poker ->
-            puntajeFijo 40 c d
+            Poker ->
+                fijo 40
 
-        Generala ->
-            puntajeFijo 50 c d
+            Generala ->
+                fijo 50
 
-        DobleGenerala ->
-            puntajeFijo 100 Generala d
+            DobleGenerala ->
+                puntajeFijo Generala d 100
 
 
 -- UPDATE
