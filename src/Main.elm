@@ -1,11 +1,11 @@
+module Main exposing (..)
+
 import Dict
 import Maybe exposing (Maybe(..))
-
 import Html exposing (..)
 import Html.App as App
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-
 import Helpers exposing (..)
 
 
@@ -18,32 +18,45 @@ main =
         }
 
 
+
 -- MODEL
 
-type alias Dados = List Int
 
-type alias Model = 
-    { puntos: Dict.Dict Categoria Int
-    , dados: Dados
-    , turno: Int
+type alias Dados =
+    List Int
+
+
+type alias Model =
+    { puntos : Dict.Dict Categoria Int
+    , dados : Dados
+    , turno : Int
     }
 
-type Categoria = Numero Int
+
+type Categoria
+    = Numero Int
     | Escalera
     | Full
     | Poker
     | Generala
     | DobleGenerala
 
-init : (Model, Cmd Msg)
-init = 
+
+init : ( Model, Cmd Msg )
+init =
     let
-        model = Model Dict.empty [] 0
+        model =
+            Model Dict.empty [] 0
     in
         ( model
-        , Cmd.none)
+        , Cmd.none
+        )
+
+
 
 {- Decide si se le deben asignar los puntos o no a una categoría -}
+
+
 validar : Categoria -> Dados -> Bool
 validar c d =
     let
@@ -51,28 +64,28 @@ validar c d =
         maxRepetitions : List comparable -> Maybe comparable
         maxRepetitions =
             countAll
-            >> Dict.values
-            >> List.sort
-            >> List.reverse
-            >> List.head
+                >> Dict.values
+                >> List.sort
+                >> List.reverse
+                >> List.head
 
         maybeFilter : (a -> Bool) -> Maybe a -> Bool
         maybeFilter f =
             Maybe.map f
-            >> Maybe.withDefault False
+                >> Maybe.withDefault False
     in
         case c of
             Escalera ->
                 d
                     |> List.sort
-                    |> flip List.member [[1,2,3,4,5], [2,3,4,5,6], [1,3,4,5,6]]
+                    |> flip List.member [ [ 1, 2, 3, 4, 5 ], [ 2, 3, 4, 5, 6 ], [ 1, 3, 4, 5, 6 ] ]
 
             Full ->
                 d
                     |> countAll
                     |> Dict.values
                     |> List.sort
-                    |> (==) [2, 3]
+                    |> (==) [ 2, 3 ]
 
             Poker ->
                 d
@@ -87,7 +100,11 @@ validar c d =
             _ ->
                 False
 
+
+
 {- Si la categoría es válida le da un puntaje fijo, sino es 0 -}
+
+
 puntajeFijo : Categoria -> Dados -> Int -> Int
 puntajeFijo c d p =
     if validar c d then
@@ -95,11 +112,13 @@ puntajeFijo c d p =
     else
         0
 
+
 puntaje : Categoria -> Dados -> Int
 puntaje c d =
     let
         fijo : Int -> Int
-        fijo = puntajeFijo c d
+        fijo =
+            puntajeFijo c d
     in
         case c of
             Numero n ->
@@ -121,26 +140,33 @@ puntaje c d =
                 puntajeFijo Generala d 100
 
 
+
 -- UPDATE
+
 
 type Msg
     = A
 
-update : Msg -> Model -> (Model, Cmd Msg)
+
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         A ->
             model ! []
 
 
+
 -- SUBSCRIPTIONS
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  Sub.none
+    Sub.none
+
 
 
 -- VIEW
+
 
 view : Model -> Html Msg
 view model =
