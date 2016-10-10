@@ -2,11 +2,15 @@ module Main exposing (..)
 
 import Dict
 import Maybe exposing (Maybe(..))
+import Random
+
 import Html exposing (..)
 import Html.App as App
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+
 import Helpers exposing (..)
+import DibujarDados exposing (..)
 
 
 main =
@@ -24,6 +28,14 @@ main =
 
 type alias Dados =
     List Int
+
+
+generarDado : Random.Generator Int
+generarDado = Random.int 1 6
+
+
+generarDados : Int -> Random.Generator Dados
+generarDados n = Random.list n generarDado
 
 
 type alias Model =
@@ -49,7 +61,8 @@ init =
             Model Dict.empty [] 0
     in
         ( model
-        , Cmd.none
+        , generarDados 5
+            |> Random.generate ResultadoDados
         )
 
 
@@ -145,14 +158,14 @@ puntaje c d =
 
 
 type Msg
-    = A
+    = ResultadoDados Dados
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        A ->
-            model ! []
+        ResultadoDados dados ->
+            { model | dados = dados } ! []
 
 
 
@@ -170,4 +183,14 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    div [] []
+    let
+        containerDado n =
+            div
+                [ style [("float", "left")] ]
+                [ dado aparienciaDefault n
+                , br [] []
+                , input [ type' "checkbox" ] [] ]
+    in
+        model.dados
+            |> List.map containerDado
+            |> div []
