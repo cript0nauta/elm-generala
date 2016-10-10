@@ -25,7 +25,7 @@ type alias Model =
 initialModel : Model
 initialModel = Model
     [ 1,2,3,4,5,6 ]
-    (Apariencia 110 25 10)
+    aparienciaDefault
 
 
 -- UPDATE

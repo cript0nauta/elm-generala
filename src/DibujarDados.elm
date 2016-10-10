@@ -1,4 +1,4 @@
-module DibujarDados exposing (Apariencia, dado)
+module DibujarDados exposing (Apariencia, aparienciaDefault, dado)
 
 import Html exposing (..)
 import Svg
@@ -10,7 +10,15 @@ type alias Apariencia =
     { ancho: Int
     , margen: Int
     , radio: Int
+    , color: String
     }
+
+aparienciaDefault : Apariencia
+aparienciaDefault =
+    { ancho = 110
+    , margen = 25
+    , radio = 10
+    , color = "black"}
 
 
 {-| Posiciones en la que se encuentra cada número en el
@@ -69,6 +77,7 @@ dado : Apariencia -> Int -> Html msg
 dado apariencia n =
     let
         ancho = toString apariencia.ancho
+        anchoContainer = toString (apariencia.ancho + 10)
         -- Convertir una coordenada a un círculo de radio definido en la apariencia
         circulo : (Int, Int) -> Svg.Svg msg
         circulo (x, y) =
@@ -80,9 +89,7 @@ dado apariencia n =
                     [ cx x'
                     , cy y'
                     , r (toString apariencia.radio)
-                    , fill "yellow"
-                    , strokeWidth "4"
-                    , stroke "green"
+                    , fill apariencia.color
                     ]
                     [ ]
 
@@ -96,8 +103,8 @@ dado apariencia n =
                 [ width ancho
                 , height ancho
                 , fill "none" 
-                , stroke "#000"
+                , stroke apariencia.color
                 , strokeWidth "5"]
                 []
     in
-        Svg.svg [] (rect :: circulos)
+        Svg.svg [ width anchoContainer, height anchoContainer ] (rect :: circulos)
