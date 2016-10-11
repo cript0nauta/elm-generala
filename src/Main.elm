@@ -42,10 +42,12 @@ generarDados n = Random.list n generarDado
 
 
 type alias Model =
-    { puntos : Dict.Dict Categoria Int
+    -- { puntos : Dict.Dict Categoria Int
+    -- Uso enteros como keys de puntos porque Categoria no es comparable
+    { puntos : Dict.Dict Int Int
     , dados : Dados
     , checked : Set.Set Int
-    , turno : Int
+    , intento : Int
     }
 
 
@@ -58,19 +60,34 @@ type Categoria
     | DobleGenerala
 
 
+categorias : List Categoria
+categorias =
+    (List.map Numero [1..6]) ++
+        [ Escalera
+        , Full
+        , Poker
+        , Generala
+        , DobleGenerala ]
+    |> Debug.log "Categorias"
+
+
+allChecked = Set.fromList [ 0, 1, 2, 3, 4 ]
+
+
+nuevoTurno : Cmd Msg
+nuevoTurno =
+    generarDados 5
+        |> Random.generate ResultadoDados
+
+
 init : ( Model, Cmd Msg )
 init =
     let
-        checked =
-            -- Quiero que se renueven todos los dados
-            Set.fromList [ 0, 1, 2, 3, 4 ]
-
         model =
-            Model Dict.empty [0,0,0,0,0] checked 0
+            Model Dict.empty [0,0,0,0,0] allChecked 0
     in
         ( model
-        , generarDados 5
-            |> Random.generate ResultadoDados
+        , nuevoTurno
         )
 
 
@@ -169,6 +186,7 @@ type Msg
     = ResultadoDados Dados
     | ToggleChecked Int
     | TirarDados
+    | JugarCategoria Categoria
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -198,6 +216,7 @@ update msg model =
             in
                 { model
                     | dados = dados
+                    , intento = (model.intento + 1 |> Debug.log "update intento")
                     -- Dejo todos los checkboxes sin chequear
                     , checked = Set.empty} ! []
 
@@ -217,6 +236,17 @@ update msg model =
             in
                 (model, (Random.generate ResultadoDados generador))
 
+        JugarCategoria c ->
+            let
+                index = List.Extra.elemIndex c categorias
+                    |> withDefault 0
+                puntos = Dict.insert index (puntaje c model.dados) model.puntos
+                    |> Debug.log "update puntos"
+            in
+                { model
+                    | puntos = puntos
+                    , checked = allChecked
+                    , intento = 0 } ! [ nuevoTurno ]
 
 
 -- SUBSCRIPTIONS
@@ -242,17 +272,46 @@ view model =
                 , input
                     [ type' "checkbox" 
                     , checked (Set.member index model.checked)
+                    , disabled ultimoIntento
                     , onClick (ToggleChecked index)]
                     [] ]
         dados = model.dados
             |> enumerate
             |> List.map containerDado
             |> div []
+
+        ultimoIntento = model.intento >= 3
+
+        puedeTirar =
+            (not (Set.isEmpty model.checked)) && (not ultimoIntento)
+
+        seJugo : Categoria -> Bool
+        seJugo c =
+            let
+                encontrado = List.Extra.elemIndex c categorias
+                    |> flip Maybe.andThen (flip Dict.get model.puntos)
+            in
+                case encontrado of
+                    Just _ ->
+                        True
+                    Nothing ->
+                        False
+
+        botonesCategoria =
+            categorias
+                |> List.map
+                    (\c -> button
+                        [ onClick <| JugarCategoria c
+                        , disabled (seJugo c)]
+                        [ text <| toString c ])
     in
         div []
             [ dados
             , input
                 [ type' "submit"
                 , onClick TirarDados
+                , disabled (not puedeTirar)
                 , value "Tirar dados"] []
+            , br [] []
+            , div [] botonesCategoria
             ]
