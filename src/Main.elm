@@ -1,8 +1,11 @@
 module Main exposing (..)
 
 import Dict
-import Maybe exposing (Maybe(..))
+import Set
+import Maybe exposing (Maybe(..), withDefault)
 import Random
+import Array
+import List.Extra exposing (zip)
 
 import Html exposing (..)
 import Html.App as App
@@ -41,6 +44,7 @@ generarDados n = Random.list n generarDado
 type alias Model =
     { puntos : Dict.Dict Categoria Int
     , dados : Dados
+    , checked : Set.Set Int
     , turno : Int
     }
 
@@ -57,8 +61,12 @@ type Categoria
 init : ( Model, Cmd Msg )
 init =
     let
+        checked =
+            -- Quiero que se renueven todos los dados
+            Set.fromList [ 0, 1, 2, 3, 4 ]
+
         model =
-            Model Dict.empty [] 0
+            Model Dict.empty [0,0,0,0,0] checked 0
     in
         ( model
         , generarDados 5
@@ -159,13 +167,55 @@ puntaje c d =
 
 type Msg
     = ResultadoDados Dados
+    | ToggleChecked Int
+    | TirarDados
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        ResultadoDados dados ->
-            { model | dados = dados } ! []
+        ResultadoDados nuevosDados ->
+            let
+                viejosDados =
+                    model.dados
+
+                indexes =
+                    Set.toList model.checked
+
+                actualizaciones : List (Int, Int)  -- (index, dado)
+                actualizaciones = zip indexes nuevosDados
+
+                dados =
+                    List.foldl
+                        (uncurry Array.set)
+                        (Array.fromList viejosDados)
+                        actualizaciones
+                    |> Array.toList
+
+                debug =
+                    (viejosDados, nuevosDados, dados)
+                    |> Debug.log "Actualizando dados"
+            in
+                { model
+                    | dados = dados
+                    -- Dejo todos los checkboxes sin chequear
+                    , checked = Set.empty} ! []
+
+        ToggleChecked n ->
+            let
+                checked = toggle n model.checked
+                    -- |> Debug.log "checked"
+            in
+                { model | checked = checked } ! []
+
+        TirarDados ->
+            let
+                cantidad =
+                    Set.size model.checked
+
+                generador = generarDados cantidad
+            in
+                (model, (Random.generate ResultadoDados generador))
 
 
 
@@ -184,13 +234,25 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     let
-        containerDado n =
+        containerDado (index, n) =
             div
                 [ style [("float", "left")] ]
                 [ dado aparienciaDefault n
                 , br [] []
-                , input [ type' "checkbox" ] [] ]
-    in
-        model.dados
+                , input
+                    [ type' "checkbox" 
+                    , checked (Set.member index model.checked)
+                    , onClick (ToggleChecked index)]
+                    [] ]
+        dados = model.dados
+            |> enumerate
             |> List.map containerDado
             |> div []
+    in
+        div []
+            [ dados
+            , input
+                [ type' "submit"
+                , onClick TirarDados
+                , value "Tirar dados"] []
+            ]
