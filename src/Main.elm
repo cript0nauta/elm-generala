@@ -5,7 +5,7 @@ import Set
 import Maybe exposing (Maybe(..), withDefault)
 import Random
 import Array
-import List.Extra exposing (zip)
+import List.Extra exposing (zip, (!!))
 
 import Html exposing (..)
 import Html.App as App
@@ -304,6 +304,40 @@ view model =
                         [ onClick <| JugarCategoria c
                         , disabled (seJugo c)]
                         [ text <| toString c ])
+
+        puntajes =
+            let
+                toTd e = td [] [ text e ]
+                size = List.length categorias
+
+                tabla : List (String, String)
+                tabla =
+                    let
+                        categoria i =
+                            categorias !! i
+                                |> Maybe.map toString
+                                |> withDefault "?"
+                        puntaje' i =
+                            Dict.get i model.puntos
+                                |> Maybe.map toString
+                                |> withDefault ""
+                    in
+                        [0..(size-1)]
+                            |> List.map (\i -> (categoria i, puntaje' i))
+            in
+                tabla
+                    |> List.map (\(a,b) -> [ a, b ] |> List.map toTd)
+                    |> List.map (tr [])
+                    |> table []
+                -- model.puntos
+                --     |> Dict.values
+                --     |> zip categorias
+                --     |> List.map (\(c, p) -> [ toTd c, toTd p ])
+                --     |> List.map (tr [])
+                --     |> table []
+                -- [0..size]
+                --     -- Convertir
+                --     |> List.map (flip Dict.get model.puntos)
     in
         div []
             [ dados
@@ -314,4 +348,5 @@ view model =
                 , value "Tirar dados"] []
             , br [] []
             , div [] botonesCategoria
+            , puntajes
             ]
